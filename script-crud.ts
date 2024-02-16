@@ -36,6 +36,31 @@ const selecionarTarefa = (
   };
 };
 
+const adicionarTarefa = (
+  estado: EstadoAplicacao,
+  tarefa: Tarefa
+): EstadoAplicacao => {
+  return {
+    ...estado,
+    tarefas: [...estado.tarefas, tarefa],
+  };
+};
+
+let tarefasEmAndamento: Tarefa[] = [];
+
+const adicionarTarefaEmAndamento = (tarefa: Tarefa) => {
+  const include = tarefasEmAndamento.includes(tarefa);
+
+  const pTarefasEmAndamento = document.querySelector<HTMLParagraphElement>(
+    ".app__section-active-task-description"
+  );
+
+  if (!include) {
+    pTarefasEmAndamento!.innerHTML += `<span>${tarefa.descricao}</span>`;
+    tarefasEmAndamento = [...tarefasEmAndamento, tarefa];
+  }
+};
+
 const atualizarUI = () => {
   const taskIconSvg = `
   <svg class="app__section-task-icon-status" width="24" height="24" viewBox="0 0 24 24"
@@ -51,6 +76,35 @@ const atualizarUI = () => {
   if (ulTarefas) {
     ulTarefas.innerHTML = "";
   }
+
+  const formAdicionarTarefa = document.querySelector<HTMLFormElement>(
+    ".app__form-add-task"
+  );
+  const btnAdicionarTarefa = document.querySelector<HTMLButtonElement>(
+    ".app__button--add-task"
+  );
+
+  const textArea = document.querySelector<HTMLTextAreaElement>(
+    ".app__form-textarea"
+  );
+
+  if (!btnAdicionarTarefa) {
+    throw Error("Não encontramos o elemento btnAdicionarTarefa.");
+  }
+
+  btnAdicionarTarefa.onclick = () => {
+    formAdicionarTarefa?.classList.toggle("hidden");
+  };
+
+  formAdicionarTarefa!.onsubmit = (evento) => {
+    evento.preventDefault();
+    const descricao = textArea!.value;
+    estadoInicial = adicionarTarefa(estadoInicial, {
+      descricao,
+      concluida: false,
+    });
+    atualizarUI();
+  };
 
   estadoInicial.tarefas.forEach((tarefa) => {
     const li = document.createElement("li");
@@ -80,6 +134,17 @@ const atualizarUI = () => {
     li.appendChild(paragraph);
     li.appendChild(button);
 
+    li.addEventListener("click", () => {
+      console.log("A tarefa foi clicada", tarefa);
+      estadoInicial = selecionarTarefa(estadoInicial, tarefa);
+      if (!tarefa.concluida) {
+        adicionarTarefaEmAndamento(tarefa);
+      }
+      atualizarUI();
+    });
+
     ulTarefas?.appendChild(li);
   });
 };
+
+atualizarUI();

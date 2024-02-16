@@ -246,6 +246,11 @@ h6 {
   line-height: 150%;
 }
 
+.app__section-active-task-description span {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .app__section-tasks-heading {
   font-size: 2.6rem;
   font-style: normal;
