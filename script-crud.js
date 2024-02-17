@@ -15,6 +15,7 @@ let estadoInicial = {
         },
     ],
     tarefaSelecionada: null,
+    editando: false,
 };
 const selecionarTarefa = (estado, tarefa) => {
     return {
@@ -27,6 +28,9 @@ const adicionarTarefa = (estado, tarefa) => {
         ...estado,
         tarefas: [...estado.tarefas, tarefa],
     };
+};
+const editarTarefa = (estado, tarefa) => {
+    return { ...estado, editando: !estado.editando, tarefaSelecionada: tarefa };
 };
 let tarefasEmAndamento = [];
 const adicionarTarefaEmAndamento = (tarefa) => {
@@ -54,6 +58,14 @@ const atualizarUI = () => {
     const formAdicionarTarefa = document.querySelector(".app__form-add-task");
     const btnAdicionarTarefa = document.querySelector(".app__button--add-task");
     const textArea = document.querySelector(".app__form-textarea");
+    if (estadoInicial.editando && estadoInicial.tarefaSelecionada) {
+        formAdicionarTarefa.classList.remove("hidden");
+        textArea.value = estadoInicial.tarefaSelecionada.descricao;
+    }
+    else {
+        formAdicionarTarefa.classList.add("hidden");
+        textArea.value = "";
+    }
     if (!btnAdicionarTarefa) {
         throw Error("Não encontramos o elemento btnAdicionarTarefa.");
     }
@@ -63,10 +75,19 @@ const atualizarUI = () => {
     formAdicionarTarefa.onsubmit = (evento) => {
         evento.preventDefault();
         const descricao = textArea.value;
-        estadoInicial = adicionarTarefa(estadoInicial, {
-            descricao,
-            concluida: false,
-        });
+        if (estadoInicial.editando) {
+            estadoInicial.tarefaSelecionada.descricao = descricao;
+            estadoInicial = editarTarefa(estadoInicial, {
+                descricao,
+                concluida: false,
+            });
+        }
+        else {
+            estadoInicial = adicionarTarefa(estadoInicial, {
+                descricao,
+                concluida: false,
+            });
+        }
         atualizarUI();
     };
     estadoInicial.tarefas.forEach((tarefa) => {
@@ -77,26 +98,30 @@ const atualizarUI = () => {
         const paragraph = document.createElement("p");
         paragraph.classList.add("app__section-task-list-item-description");
         paragraph.textContent = tarefa.descricao;
-        const button = document.createElement("button");
-        button.classList.add("app_button-edit");
+        const buttonEdit = document.createElement("button");
+        buttonEdit.classList.add("app_button-edit");
         const editIcon = document.createElement("img");
         editIcon.setAttribute("src", "/imagens/edit.png");
-        button.appendChild(editIcon);
+        buttonEdit.appendChild(editIcon);
         if (tarefa.concluida) {
-            button.setAttribute("disabled", "true");
+            buttonEdit.setAttribute("disabled", "true");
             li.classList.add("app__section-task-list-item-complete");
         }
         li.appendChild(svgIcon);
         li.appendChild(paragraph);
-        li.appendChild(button);
+        li.appendChild(buttonEdit);
         li.addEventListener("click", () => {
-            console.log("A tarefa foi clicada", tarefa);
             estadoInicial = selecionarTarefa(estadoInicial, tarefa);
             if (!tarefa.concluida) {
                 adicionarTarefaEmAndamento(tarefa);
             }
             atualizarUI();
         });
+        buttonEdit.onclick = (e) => {
+            e.stopPropagation();
+            estadoInicial = editarTarefa(estadoInicial, tarefa);
+            atualizarUI();
+        };
         ulTarefas?.appendChild(li);
     });
 };
