@@ -78,18 +78,36 @@ const concluirTarefa = (
 };
 
 let tarefasEmAndamento: Tarefa[] = [];
+const pTarefasEmAndamento = document.querySelector<HTMLParagraphElement>(
+  ".app__section-active-task-description"
+);
 
-const adicionarTarefaEmAndamento = (tarefa: Tarefa) => {
+const adicionarOuRemoverTarefaEmAndamento = (tarefa: Tarefa) => {
   const include = tarefasEmAndamento.includes(tarefa);
-
-  const pTarefasEmAndamento = document.querySelector<HTMLParagraphElement>(
-    ".app__section-active-task-description"
-  );
 
   if (!include) {
     pTarefasEmAndamento!.innerHTML += `<span>${tarefa.descricao}</span>`;
     tarefasEmAndamento = [...tarefasEmAndamento, tarefa];
   }
+
+  if (include) {
+    tarefasEmAndamento = tarefasEmAndamento.filter((item) => item !== tarefa);
+    pTarefasEmAndamento!.innerHTML = "";
+    if (tarefasEmAndamento) {
+      tarefasEmAndamento.map(
+        (tarefa) =>
+          (pTarefasEmAndamento!.innerHTML += `<span>${tarefa.descricao}</span>`)
+      );
+    }
+  }
+};
+
+const atualizarTarefaEmAndamento = () => {
+  pTarefasEmAndamento!.innerHTML = "";
+  tarefasEmAndamento.map(
+    (tarefa) =>
+      (pTarefasEmAndamento!.innerHTML += `<span>${tarefa.descricao}</span>`)
+  );
 };
 
 const atualizarUI = () => {
@@ -156,6 +174,12 @@ const atualizarUI = () => {
     const descricao = textArea!.value;
     if (estadoInicial.editando) {
       estadoInicial.tarefaSelecionada!.descricao = descricao;
+      tarefasEmAndamento.map((tarefa) => {
+        if (tarefa === estadoInicial.tarefaSelecionada!) {
+          tarefa.descricao = descricao;
+          atualizarTarefaEmAndamento();
+        }
+      });
       estadoInicial = editarTarefa(estadoInicial, {
         descricao,
         concluida: false,
@@ -205,7 +229,7 @@ const atualizarUI = () => {
     li.addEventListener("click", () => {
       estadoInicial = selecionarTarefa(estadoInicial, tarefa);
       if (!tarefa.concluida) {
-        adicionarTarefaEmAndamento(tarefa);
+        adicionarOuRemoverTarefaEmAndamento(tarefa);
       }
       atualizarUI();
     });
@@ -219,5 +243,13 @@ const atualizarUI = () => {
     ulTarefas?.appendChild(li);
   });
 };
+
+document.addEventListener("TarefaFinalizada", () => {
+  if (estadoInicial.tarefaSelecionada) {
+    estadoInicial.tarefaSelecionada.concluida = true;
+    adicionarOuRemoverTarefaEmAndamento(estadoInicial.tarefaSelecionada);
+    atualizarUI();
+  }
+});
 
 atualizarUI();
