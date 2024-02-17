@@ -32,6 +32,14 @@ const adicionarTarefa = (estado, tarefa) => {
 const editarTarefa = (estado, tarefa) => {
     return { ...estado, editando: !estado.editando, tarefaSelecionada: tarefa };
 };
+const deletarTarefa = (estado, tarefa) => {
+    estado.tarefas = estado.tarefas.filter((item) => item.descricao !== tarefa.descricao);
+    estado.editando = false;
+    estado.tarefaSelecionada = null;
+    return {
+        ...estado,
+    };
+};
 let tarefasEmAndamento = [];
 const adicionarTarefaEmAndamento = (tarefa) => {
     const include = tarefasEmAndamento.includes(tarefa);
@@ -58,9 +66,18 @@ const atualizarUI = () => {
     const formAdicionarTarefa = document.querySelector(".app__form-add-task");
     const btnAdicionarTarefa = document.querySelector(".app__button--add-task");
     const textArea = document.querySelector(".app__form-textarea");
+    const btnDelete = document.querySelector(".app__form-footer__button--delete");
+    const btnCancel = document.querySelector(".app__form-footer__button--cancel");
+    btnCancel.onclick = () => {
+        formAdicionarTarefa.classList.add("hidden");
+    };
     if (estadoInicial.editando && estadoInicial.tarefaSelecionada) {
         formAdicionarTarefa.classList.remove("hidden");
         textArea.value = estadoInicial.tarefaSelecionada.descricao;
+        btnDelete.onclick = () => {
+            deletarTarefa(estadoInicial, estadoInicial.tarefaSelecionada);
+            atualizarUI();
+        };
     }
     else {
         formAdicionarTarefa.classList.add("hidden");

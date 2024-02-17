@@ -55,6 +55,20 @@ const editarTarefa = (
   return { ...estado, editando: !estado.editando, tarefaSelecionada: tarefa };
 };
 
+const deletarTarefa = (
+  estado: EstadoAplicacao,
+  tarefa: Tarefa
+): EstadoAplicacao => {
+  estado.tarefas = estado.tarefas.filter(
+    (item) => item.descricao !== tarefa.descricao
+  );
+  estado.editando = false;
+  estado.tarefaSelecionada = null;
+  return {
+    ...estado,
+  };
+};
+
 let tarefasEmAndamento: Tarefa[] = [];
 
 const adicionarTarefaEmAndamento = (tarefa: Tarefa) => {
@@ -97,9 +111,25 @@ const atualizarUI = () => {
     ".app__form-textarea"
   );
 
+  const btnDelete = document.querySelector<HTMLButtonElement>(
+    ".app__form-footer__button--delete"
+  );
+
+  const btnCancel = document.querySelector<HTMLButtonElement>(
+    ".app__form-footer__button--cancel"
+  );
+
+  btnCancel!.onclick = () => {
+    formAdicionarTarefa!.classList.add("hidden");
+  };
+
   if (estadoInicial.editando && estadoInicial.tarefaSelecionada) {
     formAdicionarTarefa!.classList.remove("hidden");
     textArea!.value = estadoInicial.tarefaSelecionada.descricao;
+    btnDelete!.onclick = () => {
+      deletarTarefa(estadoInicial, estadoInicial.tarefaSelecionada!);
+      atualizarUI();
+    };
   } else {
     formAdicionarTarefa!.classList.add("hidden");
     textArea!.value = "";
