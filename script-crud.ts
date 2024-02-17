@@ -69,6 +69,14 @@ const deletarTarefa = (
   };
 };
 
+const concluirTarefa = (
+  estado: EstadoAplicacao,
+  tarefa: Tarefa
+): EstadoAplicacao => {
+  tarefa.concluida = true;
+  return { ...estado };
+};
+
 let tarefasEmAndamento: Tarefa[] = [];
 
 const adicionarTarefaEmAndamento = (tarefa: Tarefa) => {
@@ -179,6 +187,11 @@ const atualizarUI = () => {
     editIcon.setAttribute("src", "/imagens/edit.png");
 
     buttonEdit.appendChild(editIcon);
+
+    svgIcon.addEventListener("click", () => {
+      estadoInicial = concluirTarefa(estadoInicial, tarefa);
+      atualizarUI();
+    });
 
     if (tarefa.concluida) {
       buttonEdit.setAttribute("disabled", "true");

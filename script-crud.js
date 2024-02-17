@@ -40,6 +40,10 @@ const deletarTarefa = (estado, tarefa) => {
         ...estado,
     };
 };
+const concluirTarefa = (estado, tarefa) => {
+    tarefa.concluida = true;
+    return { ...estado };
+};
 let tarefasEmAndamento = [];
 const adicionarTarefaEmAndamento = (tarefa) => {
     const include = tarefasEmAndamento.includes(tarefa);
@@ -120,6 +124,10 @@ const atualizarUI = () => {
         const editIcon = document.createElement("img");
         editIcon.setAttribute("src", "/imagens/edit.png");
         buttonEdit.appendChild(editIcon);
+        svgIcon.addEventListener("click", () => {
+            estadoInicial = concluirTarefa(estadoInicial, tarefa);
+            atualizarUI();
+        });
         if (tarefa.concluida) {
             buttonEdit.setAttribute("disabled", "true");
             li.classList.add("app__section-task-list-item-complete");
